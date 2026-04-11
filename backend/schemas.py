@@ -1,31 +1,35 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
-# Base schema
 class StudentBase(BaseModel):
-    name: str
-    tenth: float
-    twelfth: float
-    be_cgpa: float
+    name: str = Field(..., min_length=2)
+
+    tenth: float = Field(..., ge=0, le=100)
+    twelfth: float = Field(..., ge=0, le=100)
+    be_cgpa: float = Field(..., ge=0, le=10)
+
     skills: str
     domain: str
-    projects: int
-    hackathons: int
-    papers: int
+
+    projects: int = Field(..., ge=0)
+    hackathons: int = Field(..., ge=0)
+    papers: int = Field(..., ge=0)
+
     placed: bool
+
     company: Optional[str] = None
     salary: Optional[float] = None
     company_type: Optional[str] = None
 
-# Create
+
 class StudentCreate(StudentBase):
     pass
 
-# Update
+
 class StudentUpdate(StudentBase):
     pass
 
-# Response
+
 class StudentResponse(StudentBase):
     id: int
 
