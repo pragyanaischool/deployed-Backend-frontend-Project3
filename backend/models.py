@@ -14,9 +14,11 @@ class Student(Base):
     twelfth = Column(Float)
     be_cgpa = Column(Float)
 
-    # Skills & Projects
+    # Skills
     skills = Column(String)
     domain = Column(String)
+
+    # Experience
     projects = Column(Integer)
     hackathons = Column(Integer)
     papers = Column(Integer)
@@ -25,4 +27,7 @@ class Student(Base):
     placed = Column(Boolean, default=False)
     company = Column(String)
     salary = Column(Float)
-    company_type = Column(String)  # Product / Service / Support
+    company_type = Column(String)
+
+    def __repr__(self):
+        return f"<Student(name={self.name}, cgpa={self.be_cgpa})>"
