@@ -59,28 +59,53 @@ def home():
 @app.post("/upload")
 async def upload(file: UploadFile = File(...), db: Session = Depends(get_db)):
     try:
-        df = pd.read_csv(io.BytesIO(await file.read()))
+        import pandas as pd
+        import io
 
-        required_cols = [
-            "name", "tenth", "twelfth", "be_cgpa",
-            "skills", "domain", "projects",
-            "hackathons", "papers", "placed"
-        ]
+        # Read CSV
+        contents = await file.read()
+        df = pd.read_csv(io.BytesIO(contents))
 
-        for col in required_cols:
-            if col not in df.columns:
-                raise HTTPException(status_code=400, detail=f"Missing column: {col}")
+        students = []
 
         for _, row in df.iterrows():
-            student = models.Student(**row.to_dict())
-            db.add(student)
 
+            student = models.Student(
+                name=str(row.get("name")),
+
+                tenth=float(row.get("tenth", 0)),
+                twelfth=float(row.get("twelfth", 0)),
+                be_cgpa=float(row.get("be_cgpa", 0)),
+
+                skills=str(row.get("skills", "")),
+                domain=str(row.get("domain", "")),
+
+                projects=int(row.get("projects", 0)),
+                hackathons=int(row.get("hackathons", 0)),
+                papers=int(row.get("papers", 0)),
+
+                # FIX BOOLEAN
+                placed=str(row.get("placed")).lower() == "true",
+
+                # HANDLE NULLS
+                company=None if pd.isna(row.get("company")) else str(row.get("company")),
+                salary=0.0 if pd.isna(row.get("salary")) else float(row.get("salary")),
+                company_type=None if pd.isna(row.get("company_type")) else str(row.get("company_type")),
+            )
+
+            students.append(student)
+
+        # Bulk insert
+        db.bulk_save_objects(students)
         db.commit()
 
-        return {"message": f"{len(df)} records inserted"}
+        return {
+            "message": f"{len(students)} students uploaded successfully"
+        }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        db.rollback()
+        return {"error": str(e)}
 
 # -----------------------------
 # ADD STUDENT
