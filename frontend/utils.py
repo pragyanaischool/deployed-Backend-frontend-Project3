@@ -9,7 +9,7 @@ def upload_csv(file):
         f"{API_URL}/upload",
         files={"file": file}
     )
-
+# It will call backend - REST API  - URL End Point
 # -----------------------------
 # Get Students
 # -----------------------------
